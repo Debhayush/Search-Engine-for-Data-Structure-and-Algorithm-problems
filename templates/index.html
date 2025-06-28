@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Problem Search Engine</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 70%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .result {
+      margin-bottom: 20px;
+    }
+
+    .result h3 {
+      margin: 0;
+      color: #007bff;
+    }
+
+    .result p {
+      margin: 5px 0;
+    }
+
+    #loading {
+      display: none;
+      text-align: center;
+      margin: 20px;
+      font-style: italic;
+      color: #666;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Search Problems</h1>
+    <form onsubmit="search(event)">
+      <input type="text" id="query" name="question" placeholder="Enter your query" required>
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="loading">Searching, please wait...</div>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    async function search(event) {
+      event.preventDefault();
+      const query = document.getElementById("query").value.trim();
+      if (!query) return;
+
+      const resultsDiv = document.getElementById("results");
+      const loadingDiv = document.getElementById("loading");
+
+      // Show loading
+      resultsDiv.innerHTML = "";
+      loadingDiv.style.display = "block";
+
+      try {
+        const res = await fetch(`/search?question=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        loadingDiv.style.display = "none";
+
+        if (data.length === 0) {
+          resultsDiv.innerHTML = "<p>No results found.</p>";
+        } else {
+          resultsDiv.innerHTML = data.map(item => `
+            <div class="result">
+              <h3><a href="/problem/${item.id}" target="_blank">${item.title}</a></h3>
+              <p>${item.statement}</p>
+              <small>Match: ${item.score}%</small>
+            </div>
+            <hr>
+          `).join("");
+        }
+      } catch (err) {
+        loadingDiv.style.display = "none";
+        resultsDiv.innerHTML = "<p>Error fetching results. Please try again.</p>";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
