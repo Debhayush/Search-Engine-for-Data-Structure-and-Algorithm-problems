@@ -1,0 +1,4 @@
+flask
+num2words
+selenium
+webdriver-manager
